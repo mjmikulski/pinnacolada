@@ -1,2 +1,6 @@
-# pinnacolada
-PINNa Colada: Where Deep Learning Shakes up Physics
+# PINNa colada 🍹 
+
+*Where Deep Learning Shakes up Physics 🧪🤖*
+![Pinnacolada](pinacolada.jpg)
+
+
