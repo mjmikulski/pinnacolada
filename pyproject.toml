@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "pinnacolada"
+version = "0.1.0"
+description = "PINNa Colada: Where Deep Learning Shakes up Physics"
+authors = ["Maciej J Mikulski <mjmikulski@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "~3.10"
+numpy = "~1.26.0"
+plotly = "~5.17.0"
+torch = "~2.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
