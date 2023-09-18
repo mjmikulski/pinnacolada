@@ -1,10 +1,13 @@
 import numpy as np
+import torch
 from torch.utils.data import DataLoader, Dataset, IterableDataset
 
 from physics import solution
 
+torch.set_default_dtype(torch.float32)
+
 V0s = [80, 90, 100, 110, 120]
-delta_t = 0.02
+delta_t = 0.01
 
 
 def create_empirical_data(max_height=50, max_time=10):
@@ -26,7 +29,7 @@ def create_empirical_data(max_height=50, max_time=10):
             points.append(((t, v_0), x))
             t += delta_t
             x = solution(t, v_0)
-    # points = np.asarray(points, dtype=np.float32)
+
     print(f'Created empirical data: {len(points)} points')
 
     return points
@@ -64,6 +67,7 @@ class EmpiricalDataset(Dataset):
     def __getitem__(self, idx):
         return self.points[idx]
 
+
 class PhysicsDataset(IterableDataset):
     def __iter__(self):
         while True:
@@ -78,12 +82,12 @@ class ValidationDataset(Dataset):
         return len(self.points)
 
     def __getitem__(self, idx):
-        return  self.points[idx]
+        return self.points[idx]
 
 
 def get_data_loaders():
     train_dataloader = DataLoader(EmpiricalDataset(), batch_size=10, shuffle=True, drop_last=True, num_workers=2)
-    physics_dataloader = DataLoader(PhysicsDataset(), batch_size=20, drop_last=True, num_workers=2)
+    physics_dataloader = DataLoader(PhysicsDataset(), batch_size=100, drop_last=True, num_workers=2)
     val_dataloader = DataLoader(ValidationDataset(), batch_size=100)
     return train_dataloader, physics_dataloader, val_dataloader
 

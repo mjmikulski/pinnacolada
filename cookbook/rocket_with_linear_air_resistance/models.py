@@ -1,4 +1,5 @@
 import torch
+from torch.nn import functional as F, Softplus
 
 
 class TwoSkips(torch.nn.Module):
@@ -31,7 +32,8 @@ class TwoSkips(torch.nn.Module):
         self.fc3 = torch.nn.Linear(bus_dim, 2 * bus_dim)
         self.fc3t = torch.nn.Linear(bus_dim, 2 * bus_dim)
         self.fc4 = torch.nn.Linear(4 * bus_dim, bus_dim)
-        self.fc5 = torch.nn.Linear(bus_dim, output_dim)
+        self.fc5a = torch.nn.Linear(bus_dim, 3)
+        self.fc5b = torch.nn.Linear(bus_dim, 2)
 
     def forward(self, t, v_0):
         bs = t.shape[0]
@@ -56,6 +58,8 @@ class TwoSkips(torch.nn.Module):
         # x = x + self.activation(self.fc4(c))
         x = x + self.fc4(c)
 
-        x = self.fc5(x)
+        a = self.fc5a(x)
+        b = F.softplus(self.fc5b(x))
+        c = torch.concat([a, b], dim=1)
 
-        return x
+        return c
