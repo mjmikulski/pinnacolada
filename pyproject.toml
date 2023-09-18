@@ -10,6 +10,7 @@ python = "~3.10"
 numpy = "~1.26.0"
 plotly = "~5.17.0"
 torch = "~2.0.1"
+wandb = "^0.15.10"
 
 
 [build-system]
