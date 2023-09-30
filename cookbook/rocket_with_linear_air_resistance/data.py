@@ -10,7 +10,7 @@ V0s = [80, 90, 100, 110, 120]
 delta_t = 0.01
 
 
-def create_empirical_data(max_height=50, max_time=10):
+def create_empirical_data(max_height=100, max_time=10):
     """ Generate data from experiment
 
     This simulates following situation:
@@ -88,7 +88,7 @@ class ValidationDataset(Dataset):
 def get_data_loaders():
     train_dataloader = DataLoader(EmpiricalDataset(), batch_size=10, shuffle=True, drop_last=True, num_workers=2)
     physics_dataloader = DataLoader(PhysicsDataset(), batch_size=100, drop_last=True, num_workers=2)
-    val_dataloader = DataLoader(ValidationDataset(), batch_size=100)
+    val_dataloader = DataLoader(ValidationDataset(), batch_size=10)
     return train_dataloader, physics_dataloader, val_dataloader
 
 

@@ -24,8 +24,8 @@ class TwoSkips(torch.nn.Module):
         self.bus_dim = bus_dim
 
         # self.activation = torch.nn.ELU()
-        self.activation = torch.nn.LeakyReLU()
-        # self.activation = torch.tanh
+        # self.activation = torch.nn.LeakyReLU()
+        self.activation = torch.tanh
         self.fc1 = torch.nn.Linear(bus_dim, 2 * bus_dim)
         self.fc1t = torch.nn.Linear(bus_dim, 2 * bus_dim)
         self.fc2 = torch.nn.Linear(4 * bus_dim, bus_dim)
