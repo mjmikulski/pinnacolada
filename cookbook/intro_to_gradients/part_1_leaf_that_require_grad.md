@@ -2,21 +2,21 @@
 
 ## Basics terms
 
-**Tensor** in computer word means simply a multidimensional array, i.e. a bunch 
-of numbers indexed by one or more integers. To be precise, there exist also 
-zero-dimensional tensors, which are just single numbers. Some people say that 
-tensors are a generalization of matrices to more than two dimensions. 
+**Tensor** in the computer world means simply a multidimensional array, i.e. a 
+bunch of numbers indexed by one or more integers. To be precise, there exist 
+also zero-dimensional tensors, which are just single numbers. Some people say 
+that tensors are a generalization of matrices to more than two dimensions. 
 
 If you have studied general relativity before, you may know that mathematical 
 tensors have such things as covariant and contravariant indices. But forget 
 about it - in PyTorch tensors are just multidimensional arrays. No finesse here.
 
-**Leaf tensor** is a tensor that a leaf (in the sense of a graph theory) of a
+**Leaf tensor** is a tensor that is a leaf (in the sense of a graph theory) of a
 computation graph. We will look at those below. 
 
 The `requires_grad` property of a tensor tells PyTorch whether it should 
 remember how this tensor is used in further computations. Think of tensors with 
-`requires_grad=True` as variables, while tensors with `requires_grad=False` as   
+`requires_grad=True` as variables, while tensors with `requires_grad=False` as 
 constants.
 
 
@@ -55,7 +55,7 @@ treated as a leaf.
 In a nutshell, in PyTorch, leaf tensors are either:
 
  * Directly inputted (i.e. not calculated from other tensors) and have 
-`requires_grad=True`. Example:  neural network weights that are randomly 
+`requires_grad=True`. Example: neural network weights that are randomly 
 initialized.
  * Do not require gradients at all, regardless of whether they are directly 
 inputted or computed. In the eyes of autograd, these are just constants. 
@@ -64,10 +64,28 @@ Examples:
    * an input image after mean removal or other operations, which involves 
  only non-gradient-requiring tensors.
 
+A small remark for those who want to know more. 
+The `requires_grad` property is inherited as illustrated here:
+
+```python
+a = torch.tensor([5.], requires_grad=True)
+b = torch.tensor([5.], requires_grad=True)
+c = torch.tensor([5.], requires_grad=False)
+
+d = torch.sin(a * b * c)
+
+assert d.requires_grad == any((x.requires_grad for x in (a, b, c)))
+```
+
+*Code remark: all code snippets should be self-contained except for imports that
+I include only when they appear first time. 
+I drop them in order to minimize boilerplate code. 
+I trust that the reader will be able to take care of those easily.*
+
 ## Grad retention
 
 A separate issue is gradient retention. All nodes in the computation graph, 
-meaning all tensors used, have gradients computed if they require gradients. 
+meaning all tensors used, have gradients computed if they require grad. 
 However, only leaf tensors retain these gradients. This makes sense because 
 gradients are typically used to update tensors, and only leaf tensors are 
 subject to updates during training. Non-leaf tensors, like `b` in the earlier 
@@ -111,7 +129,11 @@ Now let's look at the famous grad itself. What is it? Is it a tensor? If so, is
 it a leaf tensor? Does it require or retain grad?
 
 ```python
-# a and b as above
+a = torch.tensor([3.], requires_grad=True)
+b = a * a
+b.retain_grad()  # <- the difference
+b.backward()
+
 assert isinstance(a.grad, torch.Tensor)
 assert a.grad.requires_grad is False and a.grad.retains_grad is False and a.grad.is_leaf is True
 assert b.grad.requires_grad is False and b.grad.retains_grad is False and b.grad.is_leaf is True
@@ -139,7 +161,12 @@ try:
     b.backward()
 except RuntimeError:
     """
-    RuntimeError: Trying to backward through the graph a second time (or directly access saved tensors after they have already been freed). Saved intermediate values of the graph are freed when you call .backward() or autograd.grad(). Specify retain_graph=True if you need to backward through the graph a second time or if you need to access saved tensors after calling backward.
+    RuntimeError: Trying to backward through the graph a second time (or 
+    directly access saved tensors after they have already been freed). Saved 
+    intermediate values of the graph are freed when you call .backward() or 
+    autograd.grad(). Specify retain_graph=True if you need to backward through 
+    the graph a second time or if you need to access saved tensors after 
+    calling backward.
     """
 ```
 
@@ -151,13 +178,13 @@ b = a * a
 b.retain_grad()
 
 b.backward(retain_graph=True)
-print(a.grad)
+print(a.grad)  # prints tensor([6.])
 
 b.backward(retain_graph=True)
-print(a.grad)
+print(a.grad)  # prints tensor([12.])
 
 b.backward(retain_graph=False)
-print(a.grad)
+print(a.grad)  # prints tensor([18.])
 
 # b.backward(retain_graph=False)  <- here we would get an error, because in the 
 # previous call we did not retain the graph.
@@ -167,6 +194,7 @@ Side (but important) note: you can also observe, how the gradient accumulates in
 `a`: with every iteration it is added.
 
 ### Powerful `create_graph` argument
+
 ```python
 a = torch.tensor([5.], requires_grad=True)
 b = a * a
@@ -180,38 +208,45 @@ assert a.grad.is_leaf is False
 # On the other hand, the grad of b does not require grad, as previously. 
 assert b.grad.requires_grad is False
 assert b.grad.is_leaf is True
-
 ```
 
 The above is very useful: `a.grad` which mathematically is 
-$$\frac{\partial b}{\partial a}$$ is not a constant (leaf) anymore, but a 
+$\frac{\partial b}{\partial a}$ is not a constant (leaf) anymore, but a 
 regular member of the computation graph that can be further used. We will use 
-that fact in part 2.
+that fact in Part 2.
 
-Why the `b.grad` does not require grad? Because derivative of `b` with respect 
-to `b` is simply 1.
+Why the `b.grad` does not require grad? 
+Because derivative of `b` with respect to `b` is simply 1.
 
 If the `backward` feel unintuitive for you now, don't worry. We will soon switch
-to other method called nomen omen `grad` that allows to precisely choose 
-ingredients of the derivatives. Before, 2 side notes:
+to another method called nomen omen `grad` that allows to precisely choose 
+ingredients of the derivatives. Before, two side notes:
 
 * Side note 1: if you set `create_graph` to True, it also sets `retain_graph` 
-to True (if not explicitly set). In pytorch code it looks exactly like this:
-```python
-if retain_graph is None:
-    retain_graph = create_graph
-```
-    
+to True (if not explicitly set). In the pytorch code it looks exactly like this:
+
+    ```python (skip=True)
+    if retain_graph is None:
+        retain_graph = create_graph
+    ```
+
 * Side note 2:
 You probably saw a warning like this:
-``` 
-UserWarning: Using backward() with create_graph=True will create a reference cycle between the parameter and its gradient which can cause a memory leak. We recommend using autograd.grad when creating the graph to avoid this. If you have to use this function, make sure to reset the .grad fields of your parameters to None after use to break the cycle and avoid the leak. (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\autograd\engine.cpp:1156.)
-  Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-```
-And we will follow the advice and use `autograd.grad` now.
 
+    ``` 
+    UserWarning: Using backward() with create_graph=True will create a reference 
+    cycle between the parameter and its gradient which can cause a memory leak. 
+    We recommend using autograd.grad when creating the graph to avoid this. If you 
+    have to use this function, make sure to reset the .grad fields of your 
+    parameters to None after use to break the cycle and avoid the leak. 
+    (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\autograd\engine.cpp:1156.)
+      Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+    ```
+  
+    And we will follow the advice and use `autograd.grad` now.
 
 ## Taking derivatives with `autograd.grad` function
+
 Now let's move from the somehow high-level `.backward()` method to lower level 
 `grad` method that explicitly calculates derivative of one tensor with respect 
 to another.
@@ -231,9 +266,9 @@ treated as a function and differentiated further. So in other words, the
 > when calculating gradients, keep the history of how they were calculated, 
 > so we can treat them as non-leaf tensors that require grad, and use further.
 
-In particular, we can calculated second-order derivative:
+In particular, we can calculate second-order derivative:
 
-```python
+```python (continued=True)
 d2b_da2 = grad(db_da, a, create_graph=True)[0]
 assert d2b_da2.item() == 18
 assert d2b_da2.requires_grad is True
@@ -243,5 +278,8 @@ assert d2b_da2.requires_grad is True
 As I said before: this is actually the key property that allows us to do PINN 
 with pytorch.
 
-Side note: the `grad` function return a tuple and always the first element of 
-it is what we need. TODO: investigate what else it could return.
+Side note: the `grad` function returns a tuple and always the first element of 
+it is what we need. 
+TODO: investigate what else it could return.
+
+Let's meet in Part 2 :)

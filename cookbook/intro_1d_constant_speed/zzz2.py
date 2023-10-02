@@ -20,6 +20,9 @@ assert d.requires_grad is False and d.is_leaf is True
 # Mathematically speaking it is not a leaf (as it is a result of other operation: c * c).
 # But gradient computation will never go beyond it (i.e. there may not be any derivative with respect to c),
 # so d can be treated as a leaf.
+
+
+
 # To summarize: in pytorch, leaves are tensors that
 # - are directly inputted (i.e. not calculated) and require grad,
 #  like e.g. nn weights which are randomly sampled during model creation, or
@@ -71,7 +74,7 @@ Apparently:
 Does it retain grad? This question does not make sense, because it does not require grad. 
 
 """
-
+assert isinstance(a.grad, torch.Tensor)
 assert a.grad.requires_grad is False and a.grad.retains_grad is False and a.grad.is_leaf is True
 assert b.grad.requires_grad is False and b.grad.retains_grad is False and b.grad.is_leaf is True
 
@@ -113,9 +116,11 @@ b.backward(create_graph=True)
 
 # Here an interesting thing happen: now a.grad will require grad! Which means that we can do further calculations with it!
 assert a.grad.requires_grad is True
+assert a.grad.is_leaf is False
 
 # On the other hand, the grad of b does not require grad
 assert b.grad.requires_grad is False
+assert b.grad.is_leaf is True
 # Why? I guess this is what `backwards` is designed to do - calculate grads for leaf tensors.
 
 """
@@ -153,35 +158,3 @@ assert d2b_da2.requires_grad is True
 
 print('ok')
 
-del a, b, db_da, d2b_da2
-
-"""
-Now let's make our first PINN with single data points
-"""
-# data
-# (5, 2) -> 10
-
-
-v_0 = torch.tensor(5.)
-t = torch.tensor(2.)
-x_true = torch.tensor(10.)
-
-a = torch.rand(1, requires_grad=True)
-b = torch.rand(1, requires_grad=True)
-
-print(f'initial: {a=} {b=}')
-
-t.requires_grad = True
-
-h = a * v_0 + b
-x_pred = h * t
-
-v = grad(x_pred, t, create_graph=True)[0]
-loss_physics = (v - v_0) ** 2
-loss_physics.backward(retain_graph=True)
-print(f'{a.grad=} {b.grad=}')
-# t.requires_grad = False
-
-loss_data = (x_pred - x_true) ** 2
-loss_data.backward()
-print(f'{a.grad=} {b.grad=}')
