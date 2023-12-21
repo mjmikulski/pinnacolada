@@ -109,7 +109,13 @@ assert b.grad is None  # generates a warning
 You probably have just seen a warning:
 
 ```
-UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being accessed. Its .grad attribute won't be populated during autograd.backward(). If you indeed want the .grad field to be populated for a non-leaf Tensor, use .retain_grad() on the non-leaf Tensor. If you access the non-leaf Tensor by mistake, make sure you access the leaf Tensor instead. See github.com/pytorch/pytorch/pull/30531 for more informations. (Triggered internally at aten\src\ATen/core/TensorBody.h:491.)
+UserWarning: The .grad attribute of a Tensor that is not a leaf Tensor is being 
+accessed. Its .grad attribute won't be populated during autograd.backward(). 
+If you indeed want the .grad field to be populated for a non-leaf Tensor, use 
+.retain_grad() on the non-leaf Tensor. If you access the non-leaf Tensor by 
+mistake, make sure you access the leaf Tensor instead. 
+See github.com/pytorch/pytorch/pull/30531 for more informations. 
+(Triggered internally at aten\src\ATen/core/TensorBody.h:491.)
 ```
 
 So let's fix it by forcing `b` to retain its gradient
@@ -132,7 +138,7 @@ it a leaf tensor? Does it require or retain grad?
 ```python
 a = torch.tensor([3.], requires_grad=True)
 b = a * a
-b.retain_grad()  # <- the difference
+b.retain_grad()
 b.backward()
 
 assert isinstance(a.grad, torch.Tensor)
@@ -196,6 +202,8 @@ Side (but important) note: you can also observe, how the gradient accumulates in
 `a`: with every iteration it is added.
 
 ### Powerful `create_graph` argument
+
+How to make grad require grad?
 
 ```python
 a = torch.tensor([5.], requires_grad=True)
@@ -276,7 +284,7 @@ assert d2b_da2.item() == 18
 assert d2b_da2.requires_grad is True
 ```
 
-As I said before: this is actually the key property that allows us to do PINN
+As said before: this is actually the key property that allows us to do PINN
 with pytorch.
 
 Side note: the `grad` function returns a tuple and always the first element of
