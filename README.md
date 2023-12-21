@@ -1,7 +1,8 @@
 # PINNa colada 🍹 
 
 *Where Deep Learning Shakes up Physics 🧪🤖*
-![Pinnacolada](pinacolada.jpg)
+
+![Pinnacolada](pinnacolada.jpg)
 
 
 ## Dependencies (for development, i.e. after cloning the repo)
