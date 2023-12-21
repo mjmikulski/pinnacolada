@@ -11,6 +11,8 @@ numpy = "~1.26.0"
 plotly = "~5.17.0"
 wandb = "^0.15.10"
 tqdm = "^4.66.1"
+kaleido = "0.2.1"
+matplotlib = "^3.8.2"
 
 
 [build-system]
