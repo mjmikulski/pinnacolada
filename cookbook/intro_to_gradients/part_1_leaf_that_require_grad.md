@@ -50,7 +50,7 @@ are considered leaf tensors, as per
 [PyTorch's documentation](https://pytorch.org/docs/stable/generated/torch.Tensor.is_leaf.html).
 While mathematically, `d` is not a leaf (since it results from another
 operation, `c * c`), gradient computation will never extend beyond it. In other
-words, there won't be any derivative with respect to `c`, allowing `d` to be
+words, there won't be any derivative with respect to `c`. This allows `d` to be
 treated as a leaf.
 
 In a nutshell, in PyTorch, leaf tensors are either:
@@ -89,7 +89,7 @@ A separate issue is gradient retention. All nodes in the computation graph,
 meaning all tensors used, have gradients computed if they require grad.
 However, only leaf tensors retain these gradients. This makes sense because
 gradients are typically used to update tensors, and only leaf tensors are
-subject to updates during training. Non-leaf tensors, like `b` in the earlier
+subject to updates during training. Non-leaf tensors, like `b` in the first
 example, are not directly updated; they change as a result of changes in `a`,
 so their gradients can be discarded. However, there are scenarios, especially
 in Physics-Informed Neural Networks (PINNs), where you might want to retain

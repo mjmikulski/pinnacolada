@@ -2,7 +2,7 @@
 name = "pinnacolada"
 version = "0.1.0"
 description = "PINNa Colada: Where Deep Learning Shakes up Physics"
-authors = ["Maciej J Mikulski <mjmikulski@users.noreply.github.com>"]
+authors = ["Maciej J Mikulski <mjmikulski@agh.edu.pl>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

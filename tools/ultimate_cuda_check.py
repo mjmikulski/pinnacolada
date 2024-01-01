@@ -9,13 +9,9 @@ print(f'{torch.cuda.get_device_name(0)=}')
 print(f'{torch.cuda.get_device_capability(0)=}')
 print(f'{torch.cuda.get_device_properties(0).total_memory=}')
 
-
 try:
     import torchvision
 except ImportError:
     print('torchvision not installed')
 else:
     print(f'{torchvision.__version__=}')
-
-
-
