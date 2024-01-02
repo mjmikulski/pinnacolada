@@ -1,4 +1,4 @@
-# Part 1: Leaf that requires grad
+# Part 1: Leaves and gradients
 
 ## Basics terms
 
@@ -287,8 +287,7 @@ assert d2b_da2.requires_grad is True
 As said before: this is actually the key property that allows us to do PINN
 with pytorch.
 
-Side note: the `grad` function returns a tuple and always the first element of
-it is what we need.
-TODO: investigate what else it could return.
+Side note: the `grad` function returns a tuple and the first element of it is 
+what we need.
 
-Let's meet in Part 2 :)
+Let's meet in Part 2 where we will have closer look at `grad` :)
