@@ -6,6 +6,12 @@ __pycache__/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# PyCharm
+# Envs
+.venv
+/poetry.lock
 
+# PyCharm
 .idea/
+
+wandb/
+*.png
